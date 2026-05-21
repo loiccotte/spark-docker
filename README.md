@@ -19,9 +19,9 @@
 
 Dans ce TP, nous allons utiliser :
 
-* X Spark Master
-* X Spark Workers
-* X environnement Jupyter avec PySpark
+* 1 Spark Master
+* 3 Spark Workers
+* 1 environnement Jupyter avec PySpark
 
 L’ensemble sera déployé avec Docker Compose. 
 
@@ -177,6 +177,11 @@ https://mcauleylab.ucsd.edu/public_datasets/data/amazon_2023/raw/meta_categories
 
 Télécharger le fichier suivant :
 
+Commande pour droits écriture sur spark-jupyter dans work/ : docker exec -u root spark-jupyter chown -R jovyan:users /home/jovyan/work
+
+docker exec -u root spark-jupyter chmod -R 775 /home/jovyan/work
+
+
 ```text
 https://mcauleylab.ucsd.edu/public_datasets/data/amazon_2023/raw/meta_categories/meta_Automotive.jsonl.gz
 ```
@@ -246,11 +251,16 @@ print(pandas_df.head())
 
 
 Où les données sont-elles chargées lors de l’utilisation de Pandas ?
+
+R : Les données sont chargées dans la mémoire vive
 ---
 
 ### Question 2
 
 Quel est le principal risque lorsque la taille des données augmente fortement ?
+
+Le risque est que la mémoire vive ne suffisent plus, et que les données soit trop conséquentes pour être traités entièrement.
+De plus mémoire vive plus chère que disque dur, donc coût traitement élevé
 
 ---
 
@@ -285,7 +295,7 @@ pandas_df = pd.read_json(
 
 Selon votre machine :
 
-> Completer moi ....
+> Ici, le fichier plante car 2go ram attribué à la machine selon docker compose
 
 ---
 
@@ -294,7 +304,7 @@ Selon votre machine :
 ### Question 4
 
 Pourquoi Pandas rencontre-t-il cette situation?
-
+> Pas assez de mémoire vive disponible
 ---
 
 ### Question 5
@@ -431,32 +441,38 @@ Observer :
 ### Question 8
 
 Quelle différence fondamentale existe-t-il entre Pandas et Spark ?
+Pandas travail sur une seul machine et charge le tout en mémoire vive
+Spark distribue la tâche entre plusieurs workers.
 
 ---
 
 ### Question 9
 
 Pourquoi Spark peut-il traiter des volumes beaucoup plus importants ?
+Spark partitionne le fichier intial et répartie les tâches
 
 ---
 
 ### Question 10
 
 Quel est le rôle des workers dans Spark ?
+Les workers executent les tâches, ils sont dirigés par le master, auquel ils renvoient leur résultats finaux.
 
 ---
 
 ### Question 11
 
 Pourquoi Spark est-il adapté au Big Data ?
+Spark est adapté au Big data car il répond aux 5V et permet la scalabilité horizontale (On rajoute des noeuds plutot que d'améliorer les noeuds existants)
 
 ---
 
 ### Question 12
 
 Quels sont les inconvénients possibles de Spark ?
+La prise en main et configuration de Spark est plus délicate que Python, l'outil est overkill pour des petits fichiers.
 
-<!-- ---
+
 
 # Partie 8 — Comparaison Pandas vs Spark
 
@@ -464,14 +480,14 @@ Compléter le tableau suivant.
 
 | Critère                      | Pandas | Spark |
 | ---------------------------- | ------ | ----- |
-| Chargement mémoire           |        |       |
-| Calcul distribué             |        |       |
-| Scalabilité                  |        |       |
-| Simplicité d’utilisation     |        |       |
-| Performances petits fichiers |        |       |
-| Performances gros volumes    |        |       |
-| Tolérance aux pannes         |        |       |
-| Infrastructure nécessaire    |        |       |
+| Chargement mémoire           |    x   |       |
+| Calcul distribué             |        |    x   |
+| Scalabilité                  |        |     x  |
+| Simplicité d’utilisation     |   x    |        |
+| Performances petits fichiers |    x   |        |
+| Performances gros volumes    |        |   x    |
+| Tolérance aux pannes         |        |   x    |
+| Infrastructure nécessaire    |        |   x    |
 
 ---
 
@@ -482,25 +498,31 @@ Compléter le tableau suivant.
 Dans quels cas Pandas reste-t-il un très bon choix ?
 
 ---
-
+Petit fichiers, cas d'utilisation simple, tâches uniques.
 ## Question 14
 
 Dans quels cas Spark devient-il indispensable ?
 
+
 ---
+Grands volumes de données, besoin de vélocité, traitement en temps réel. 
 
 ## Question 15
 
 Expliquez pourquoi le calcul distribué devient essentiel dans les architectures Big Data modernes.
 
+
 ---
+Coût de scalabilité vertical plus chère que horizontale, meilleures tolérances aux pannes.
 
 ## Question 16
 
 Pourquoi l’utilisation de plusieurs machines peut-elle être plus efficace qu’une seule machine très puissante ?
 
----
 
+
+---
+Permet le partitionnement, on découpe une tâche. 
 # Partie 10 — Bonus
 
 ## Bonus 1 — Mesure de temps
